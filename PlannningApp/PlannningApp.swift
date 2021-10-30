@@ -1,11 +1,5 @@
-//
-//  PetProject1App.swift
-//  PetProject1
-//
-//  Created by Артём Тихоненко on 20.10.2021.
-//
-
 import SwiftUI
+import Firebase
 
 @main
 struct PetProject1App: App {
@@ -13,5 +7,9 @@ struct PetProject1App: App {
         WindowGroup {
             MainMenu()
         }
+    }
+    
+    init() {
+        FirebaseApp.configure()
     }
 }
