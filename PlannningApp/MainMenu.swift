@@ -1,16 +1,41 @@
 import SwiftUI
 import Firebase
 
+
+class SessionStore: ObservableObject {
+    @Published var session: User?
+    
+    var handle: AuthStateDidChangeListenerHandle?
+    
+    deinit {
+        if handle != nil {
+            Auth.auth().removeStateDidChangeListener(handle!)
+        }
+    }
+    
+    init() {
+        if handle == nil {
+            handle = Auth.auth().addStateDidChangeListener({ [unowned self] _, user in
+                self.session = user
+            })
+        }
+    }
+    
+}
+
+
 struct MainMenu: View {
+    
+    @ObservedObject var sessionStore = SessionStore()
+    
     var body: some View {
         NavigationView {
             Form {
-                Section(header: Text("ACCOUNT")) {
+                Section(header: Text("Account")) {
                     NavigationLink(destination: AccountMainMenu()) {
                         HStack {
                             Image(systemName: "person.circle")
-                                .padding()
-                            if let user = Auth.auth().currentUser {
+                            if let user = sessionStore.session {
                                 Text("Welcome, \(user.email ?? "Anon")!")
                             } else {
                                 Text("Sign in / sign up")
@@ -24,9 +49,8 @@ struct MainMenu: View {
 }
 
 func logOutFirebase() {
-    let firebaseAuth = Auth.auth()
     do {
-        try firebaseAuth.signOut()
+        try Auth.auth().signOut()
     } catch let signOutError as NSError {
         print("Error signing out: %@", signOutError)
     }
@@ -35,19 +59,22 @@ func logOutFirebase() {
 struct AccountMainMenu: View {
     @State private var showingLogoutAlert: Bool = false
     var body: some View {
-        if let user = Auth.auth().currentUser {
-            Form {
+        if let user = Auth.auth().currentUser { // user is logged in
+            Form { // basic account info
                 Text("Your E-mail: \(user.email ?? "*error getting email*")")
                 Text("Your name: \(user.displayName ?? "*error getting name*")")
+                
+                Button("Log out", action: { showingLogoutAlert.toggle() })
             }
-            .alert("Are you sure?", isPresented: $showingLogoutAlert) {
+            
+            .alert("Are you sure?", isPresented: $showingLogoutAlert) { // Log out alert
                 Button(role: .destructive, action: logOutFirebase, label: { Text("Log out") })
                 Button(role: .cancel, action: { showingLogoutAlert = false }, label: { Text("Cancel") })
             } message: {
-                Text("Are you sure want to log out from \(Auth.auth().currentUser?.email ?? "*error getting email*")")
+                Text("Are you sure want to log out from \(Auth.auth().currentUser?.email ?? "*error getting email*")?")
             }
         }
-        else {
+        else { // user isn't logged in
             NavigationView {
                 Form {
                     NavigationLink(destination: CreateAccountView()) {
@@ -81,7 +108,7 @@ struct CreateAccountView: View {
     @State private var successText: String = ""
     
     var body: some View {
-        Form {
+        Form { // new account form
             TextField(
                 "E-mail",
                 text: $userEmail,
@@ -141,9 +168,9 @@ struct CreateAccountView: View {
                actions: {
             Button(role: .cancel,
                    action: {
-                self.showingErrorAlert = false
-                self.userPassword = ""
-                self.userPasswordConfirmation = ""
+                showingErrorAlert.toggle()
+                userPassword = ""
+                userPasswordConfirmation = ""
             }, label: { Text("Dismiss") })
         }, message: { Text(errorText) })
         
@@ -165,14 +192,20 @@ struct LogInView: View {
     @State private var errorText: String = ""
     @State private var showingSuccessAlert: Bool = false
     @State private var successText: String = ""
+    @FocusState private var emailFieldIsFocused: Bool
+    @FocusState private var passwordFieldIsFocused: Bool
+    
     var body: some View {
         Form {
             Section(header: Text("E-mail")) {
-            TextField(
-                "Your e-mail",
-                text: $userEmail,
-                prompt: Text("Enter your e-mail")
-            )
+                TextField(
+                    "Your e-mail",
+                    text: $userEmail,
+                    prompt: Text("Enter your e-mail")
+                )
+                    .textInputAutocapitalization(.never)
+                    .disableAutocorrection(true)
+                    .focused($emailFieldIsFocused)
             }
             Section(header: Text("Password")) {
                 SecureField(
@@ -180,6 +213,9 @@ struct LogInView: View {
                     text: $userPassword,
                     prompt: Text("Enter your password")
                 )
+                    .textInputAutocapitalization(.never)
+                    .disableAutocorrection(true)
+                    .focused($passwordFieldIsFocused)
             }
             Button("Log-in") {
                 Auth.auth().signIn(withEmail: userEmail, password: userPassword) { data, error in
@@ -199,7 +235,7 @@ struct LogInView: View {
             } label: {
                 Text("Cancel")
             }
-
+            
         } message: {
             Text(errorText)
         }
@@ -210,8 +246,8 @@ struct LogInView: View {
         } message: {
             Text(successText)
         }
-
-
+        
+        
     }
 }
 
