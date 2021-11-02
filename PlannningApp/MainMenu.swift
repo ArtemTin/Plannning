@@ -26,7 +26,7 @@ class SessionStore: ObservableObject {
 
 struct MainMenu: View {
     
-    @ObservedObject var sessionStore = SessionStore()
+    @StateObject var sessionStore = SessionStore()
     
     var body: some View {
         NavigationView {
@@ -45,6 +45,7 @@ struct MainMenu: View {
                 }
             }
         }
+        .environmentObject(sessionStore)
     }
 }
 
@@ -58,11 +59,13 @@ func logOutFirebase() {
 
 struct AccountMainMenu: View {
     @State private var showingLogoutAlert: Bool = false
+    @EnvironmentObject var sessionStore: SessionStore
+    
     var body: some View {
-        if let user = Auth.auth().currentUser { // user is logged in
+        if let user = sessionStore.session { // user is logged in
             Form { // basic account info
                 Text("Your E-mail: \(user.email ?? "*error getting email*")")
-                Text("Your name: \(user.displayName ?? "*error getting name*")")
+                Text("Your name: \(user.displayName ?? "*error getting name*")") // TODO: после регистрации имя не подгружается, тк это не ивент изменения статуса входа/выхода
                 
                 Button("Log out", action: { showingLogoutAlert.toggle() })
             }
@@ -71,7 +74,7 @@ struct AccountMainMenu: View {
                 Button(role: .destructive, action: logOutFirebase, label: { Text("Log out") })
                 Button(role: .cancel, action: { showingLogoutAlert = false }, label: { Text("Cancel") })
             } message: {
-                Text("Are you sure want to log out from \(Auth.auth().currentUser?.email ?? "*error getting email*")?")
+                Text("Are you sure want to log out from \(sessionStore.session?.email ?? "*error getting email*")?")
             }
         }
         else { // user isn't logged in
@@ -106,6 +109,7 @@ struct CreateAccountView: View {
     @State private var errorText: String = ""
     @State private var showingSuccessAlert: Bool = false
     @State private var successText: String = ""
+    @EnvironmentObject var sessionStore: SessionStore
     
     var body: some View {
         Form { // new account form
@@ -146,19 +150,29 @@ struct CreateAccountView: View {
                 Auth.auth().createUser(withEmail: userEmail, password: userPassword) {
                     data, error in
                     if let realError = error {
-                        self.showingErrorAlert = true
-                        self.errorText = realError.localizedDescription
+                        errorText = realError.localizedDescription
+                        print(errorText)
+                        showingErrorAlert = true
                     } else {
-                        let changeRequest = Auth.auth().currentUser?.createProfileChangeRequest()
+                        let changeRequest = sessionStore.session?.createProfileChangeRequest()
                         changeRequest?.displayName = userName
-                        changeRequest?.commitChanges { error in
-                            if let realError = error {
-                                self.showingErrorAlert = true
-                                self.errorText = realError.localizedDescription
+                        if let cR = changeRequest {
+                            cR.commitChanges { error in
+                                if let realError = error {
+                                    errorText = realError.localizedDescription
+                                    print(errorText)
+                                    showingErrorAlert = true
+                                } else {
+                                    successText = "We successfully created user with email \(userEmail)"
+                                    print(successText)
+                                    showingSuccessAlert = true
+                                }
                             }
+                        } else {
+                            errorText = "Error creating changeRequest"
+                            print(errorText)
+                            showingErrorAlert = true
                         }
-                        self.showingSuccessAlert = true
-                        self.successText = "We successfully created user with email \(userEmail)"
                     }
                 }
             }
@@ -179,7 +193,7 @@ struct CreateAccountView: View {
                actions: {
             Button(role: .none,
                    action: {
-                self.showingSuccessAlert = false
+                showingSuccessAlert.toggle()
             }, label: { Text("Okay") })
         }, message: { Text(successText) })
     }
@@ -194,6 +208,8 @@ struct LogInView: View {
     @State private var successText: String = ""
     @FocusState private var emailFieldIsFocused: Bool
     @FocusState private var passwordFieldIsFocused: Bool
+    
+    @EnvironmentObject var sessionStore: SessionStore
     
     var body: some View {
         Form {
@@ -221,9 +237,11 @@ struct LogInView: View {
                 Auth.auth().signIn(withEmail: userEmail, password: userPassword) { data, error in
                     if let realError = error {
                         errorText = realError.localizedDescription
+                        print(errorText)
                         showingErrorAlert = true
                     } else {
-                        successText = "We succefully logged you into \(Auth.auth().currentUser?.email ?? "*error getting email*")"
+                        successText = "We succefully logged you into \(sessionStore.session?.email ?? "*error getting email*")"
+                        print(successText)
                         showingSuccessAlert = true
                     }
                 }
