@@ -4,7 +4,6 @@ import Firebase
 struct AccountMainMenu: View {
     @State private var showingLogoutAlert: Bool = false
     @EnvironmentObject var sessionStore: SessionStore
-    
     var body: some View {
         if let user = sessionStore.session { // user is logged in
             Form { // basic account info
@@ -22,23 +21,20 @@ struct AccountMainMenu: View {
             }
         }
         else { // user isn't logged in
-            NavigationView {
-                Form {
-                    NavigationLink(destination: CreateAccountView()) {
-                        Text("Create new account")
-                            .bold()
-                    }
-                    NavigationLink(destination: LogInView()) {
-                        Text("Log-in into existing account")
-                            .bold()
-                    }
+            Form {
+                NavigationLink(destination: CreateAccountView()) {
+                    Text("Create new account")
+                        .bold()
                 }
-                .navigationBarHidden(true)
+                NavigationLink(destination: LogInView()) {
+                    Text("Log-in into existing account")
+                        .bold()
+                }
             }
-            .navigationTitle(Text("You're not signed in"))
         }
     }
 }
+
 
 
 struct CreateAccountView: View {

@@ -76,10 +76,10 @@
 				702B80CA27202DB60060303D /* PlannningApp.swift */,
 				702B80CC27202DB60060303D /* MainMenu.swift */,
 				706CE5B12736F13D00137962 /* AccountMenu.swift */,
+				706CE5AF2736F0BA00137962 /* ViewModel.swift */,
 				702B80CE27202DB80060303D /* Assets.xcassets */,
 				708FF7DB272C997C00697012 /* GoogleService-Info.plist */,
 				702B80D027202DB80060303D /* Preview Content */,
-				706CE5AF2736F0BA00137962 /* ViewModel.swift */,
 			);
 			path = PlannningApp;
 			sourceTree = "<group>";

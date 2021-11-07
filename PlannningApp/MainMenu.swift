@@ -1,9 +1,11 @@
 import SwiftUI
-import Firebase                                                                                       
+import Firebase
+
 
 struct MainMenu: View {
     
     @StateObject var sessionStore = SessionStore()
+    @State var selection: String?
     
     var body: some View {
         NavigationView {
@@ -13,10 +15,34 @@ struct MainMenu: View {
                         HStack {
                             Image(systemName: "person.circle")
                             if let user = sessionStore.session {
-                                Text("Welcome, \(user.email ?? "Anon")!")
+                                Text("Welcome, \(user.email ?? "*error getting email*")!")
                             } else {
                                 Text("Sign in / sign up")
                             }
+                        }
+                    }
+                }
+                Section(header: Text("Projects")) {
+                    NavigationLink(destination: UserProjectsMenu()) {
+                        HStack {
+                            Text("Open project...")
+                        }
+                    }
+                    NavigationLink(destination: ProjectsNavigator()) {
+                        HStack {
+                            Text("Browse projects online")
+                        }
+                    }
+                    NavigationLink(destination: NewProject()) {
+                        HStack {
+                            Text("Create new project")
+                        }
+                    }
+                }
+                Section(header: Text("Settings")) {
+                    NavigationLink(destination: SettingsMenu()) {
+                        HStack {
+                            Text("General settings")
                         }
                     }
                 }
@@ -45,8 +71,3 @@ struct SettingsMenu: View {
     }
 }
 
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        MainMenu()
-    }
-}
