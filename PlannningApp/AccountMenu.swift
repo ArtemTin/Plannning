@@ -80,39 +80,41 @@ struct CreateAccountView: View {
                 }
             }
             
-            Button("Create account") { Auth.auth().createUser(withEmail: userEmail, password: userPassword) {
-                data, error in
-                if let realError = error {
-                    errorText = realError.localizedDescription
-                    print(errorText)
-                    showingErrorAlert = true
-                } else {
-                    // setting displayName
-                    let changeRequest = sessionStore.session?.createProfileChangeRequest()
-                    changeRequest?.displayName = userName
-                    if let cR = changeRequest {
-                        cR.commitChanges { error in
-                            if error != nil {
-                                successText = "We created the account, but couldn't set displayName"
-                                print(successText)
-                                showingSuccessAlert = true
-                            } else {
-                                successText = "We successfully created user with email \(userEmail)"
-                                sessionStore.displayName = userName
-                                print(successText)
-                                showingSuccessAlert = true
-                            }
-                        }
+            Button("Create account") {
+                Auth.auth().createUser(withEmail: userEmail, password: userPassword) {
+                    data, error in
+                    if let realError = error {
+                        errorText = realError.localizedDescription
+                        print(errorText)
+                        showingErrorAlert = true
                     } else {
-                        successText = "We created the account, but couldn't set displayName"
-                        print(successText)
-                        print("error creating changeRequest")
-                        showingSuccessAlert = true
+                        // setting displayName
+                        let changeRequest = sessionStore.session?.createProfileChangeRequest()
+                        changeRequest?.displayName = userName
+                        if let cR = changeRequest {
+                            cR.commitChanges { error in
+                                if error != nil {
+                                    successText = "We created the account, but couldn't set displayName"
+                                    print(successText)
+                                    showingSuccessAlert = true
+                                } else {
+                                    successText = "We successfully created user with email \(userEmail)"
+                                    sessionStore.displayName = userName
+                                    print(successText)
+                                    showingSuccessAlert = true
+                                }
+                            }
+                        } else {
+                            successText = "We created the account, but couldn't set displayName"
+                            print(successText)
+                            print("error creating changeRequest")
+                            showingSuccessAlert = true
+                        }
                     }
                 }
             }
-            }
         }
+        .navigationTitle("New account")
         .alert("Error occured",
                isPresented: $showingErrorAlert,
                actions: {
@@ -132,9 +134,9 @@ struct CreateAccountView: View {
                 showingSuccessAlert.toggle()
             }, label: { Text("Okay") })
         }, message: { Text(successText) })
+        
     }
 }
-
 
 struct LogInView: View {
     @State private var userEmail: String = ""
@@ -180,6 +182,7 @@ struct LogInView: View {
                 }
             }
         }
+        .navigationTitle("Log in")
         .alert("Error occurred", isPresented: $showingErrorAlert) {
             Button(role: .cancel) {
                 showingErrorAlert.toggle()
@@ -201,3 +204,4 @@ struct LogInView: View {
         
     }
 }
+

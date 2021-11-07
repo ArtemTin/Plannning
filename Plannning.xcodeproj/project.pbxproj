@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		702179E7273822460035FB5F /* ProjectsMenus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 702179E6273822460035FB5F /* ProjectsMenus.swift */; };
 		702B80CB27202DB60060303D /* PlannningApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 702B80CA27202DB60060303D /* PlannningApp.swift */; };
 		702B80CD27202DB60060303D /* MainMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 702B80CC27202DB60060303D /* MainMenu.swift */; };
 		702B80CF27202DB80060303D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 702B80CE27202DB80060303D /* Assets.xcassets */; };
@@ -25,6 +26,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		702179E6273822460035FB5F /* ProjectsMenus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectsMenus.swift; sourceTree = "<group>"; };
 		702B80C727202DB60060303D /* Plannning.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Plannning.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		702B80CA27202DB60060303D /* PlannningApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlannningApp.swift; sourceTree = "<group>"; };
 		702B80CC27202DB60060303D /* MainMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainMenu.swift; sourceTree = "<group>"; };
@@ -75,6 +77,7 @@
 			children = (
 				702B80CA27202DB60060303D /* PlannningApp.swift */,
 				702B80CC27202DB60060303D /* MainMenu.swift */,
+				702179E6273822460035FB5F /* ProjectsMenus.swift */,
 				706CE5B12736F13D00137962 /* AccountMenu.swift */,
 				706CE5AF2736F0BA00137962 /* ViewModel.swift */,
 				702B80CE27202DB80060303D /* Assets.xcassets */,
@@ -177,6 +180,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				702B80CD27202DB60060303D /* MainMenu.swift in Sources */,
+				702179E7273822460035FB5F /* ProjectsMenus.swift in Sources */,
 				706CE5B02736F0BA00137962 /* ViewModel.swift in Sources */,
 				706CE5B22736F13D00137962 /* AccountMenu.swift in Sources */,
 				702B80CB27202DB60060303D /* PlannningApp.swift in Sources */,

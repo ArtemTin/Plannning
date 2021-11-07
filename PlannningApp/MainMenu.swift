@@ -23,17 +23,19 @@ struct MainMenu: View {
                     }
                 }
                 Section(header: Text("Projects")) {
-                    NavigationLink(destination: UserProjectsMenu()) {
+                    NavigationLink(destination: ExistingProjectMenu()) {
                         HStack {
                             Text("Open project...")
                         }
                     }
-                    NavigationLink(destination: ProjectsNavigator()) {
+                    
+                    NavigationLink(destination: ImportProjectMenu()) {
                         HStack {
                             Text("Browse projects online")
                         }
                     }
-                    NavigationLink(destination: NewProject()) {
+                    
+                    NavigationLink(destination: NewProjectMenu()) {
                         HStack {
                             Text("Create new project")
                         }
@@ -47,27 +49,17 @@ struct MainMenu: View {
                     }
                 }
             }
-            .navigationTitle(Text("Plannning"))
+            .navigationBarTitle(Text("Plannning"))
         }
         .environmentObject(sessionStore)
     }
 }
 
-struct NewProjectMenu: View {
-    var body: some View {
-        Text("NewProject: pass")
-    }
-}
-
-struct OpenProjectMenu: View {
-    var body: some View {
-        Text("Open project: pass")
-    }
-}
 
 struct SettingsMenu: View {
     var body: some View {
         Text("Settings: pass")
+            .navigationTitle("General")
     }
 }
 
