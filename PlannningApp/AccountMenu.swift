@@ -51,7 +51,7 @@ struct CreateAccountView: View {
     @State private var showingSuccessAlert: Bool = false
     @State private var successText: String = ""
     @EnvironmentObject var sessionStore: SessionStore
-    
+    // TODO: Проверка совпадения паролей только если второе поле непустое. Также приложение делает проверки, а не гугл (совпадение паролей и заполненность полей). Сделать кнопку серой, если не заполнено поле.
     
     var body: some View {
         Form {
@@ -75,7 +75,7 @@ struct CreateAccountView: View {
                     .textInputAutocapitalization(.never)
                     .disableAutocorrection(true)
                 
-                if userPasswordConfirmation != userPassword {
+                if userPasswordConfirmation != userPassword && userPasswordConfirmation != "" {
                     Text("Passwords don't match")
                 }
             }
@@ -113,6 +113,7 @@ struct CreateAccountView: View {
                     }
                 }
             }
+            .disabled(userPassword != userPasswordConfirmation || userPassword == "" || userPasswordConfirmation == "")
         }
         .navigationTitle("New account")
         .alert("Error occured",
@@ -120,9 +121,7 @@ struct CreateAccountView: View {
                actions: {
             Button(role: .cancel,
                    action: {
-                showingErrorAlert.toggle()
-                userPassword = ""
-                userPasswordConfirmation = ""
+                showingErrorAlert = false
             }, label: { Text("Dismiss") })
         }, message: { Text(errorText) })
         
@@ -131,7 +130,7 @@ struct CreateAccountView: View {
                actions: {
             Button(role: .none,
                    action: {
-                showingSuccessAlert.toggle()
+                showingSuccessAlert = false
             }, label: { Text("Okay") })
         }, message: { Text(successText) })
         
@@ -185,7 +184,7 @@ struct LogInView: View {
         .navigationTitle("Log in")
         .alert("Error occurred", isPresented: $showingErrorAlert) {
             Button(role: .cancel) {
-                showingErrorAlert.toggle()
+                showingErrorAlert = false
             } label: {
                 Text("Cancel")
             }
@@ -195,7 +194,7 @@ struct LogInView: View {
         }
         .alert("Success", isPresented: $showingSuccessAlert) {
             Button("Okay") {
-                showingSuccessAlert.toggle()
+                showingSuccessAlert = false
             }
         } message: {
             Text(successText)
