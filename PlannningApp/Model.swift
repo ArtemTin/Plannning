@@ -29,3 +29,7 @@ class SessionStore: ObservableObject {
         }
     }
 }
+
+class FilesStore {
+    let storage = Storage.storage()
+}
