@@ -7,8 +7,11 @@ struct AccountMainMenu: View {
     var body: some View {
         if let user = sessionStore.session { // user is logged in
             Form { // basic account info
+                Section(user.uid) {
                 Text("Your E-mail: \(user.email ?? "*error getting email*")")
                 Text("Your name: \(user.displayName ?? "*error getting name*")")
+                }
+                
                 
                 Button("Log out", action: { showingLogoutAlert.toggle() })
             }

@@ -9,6 +9,7 @@ struct FRFile: Identifiable {
 }
 
 struct ExistingProjectMenu: View {
+    @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
     @EnvironmentObject var sessionStore: SessionStore
     @State var filesList: [FRFile] = []
     
@@ -18,15 +19,17 @@ struct ExistingProjectMenu: View {
         if let user = sessionStore.session {
             List {
                 ForEach(filesList) {
-                    f in
-                    NavigationLink(destination: FileRedactor(fileRef: f)) {
-                        Text(f.name)
+                    file in
+                    NavigationLink(destination: FileRedactor(fileRef: file)) {
+                        Text(file.name)
                     }
                 }
             }
             .onAppear {
-                let privatePath = Storage.storage().reference().child("user/\(user.uid)/private")
-                privatePath.listAll { result, error in
+                filesList = []
+                let storage = Storage.storage()
+                let privateFilesPath = storage.reference().child("user/\(user.uid)/private/")
+                privateFilesPath.listAll { (result, error) in
                     if let realError = error {
                         errorText = realError.localizedDescription
                         showingErrorAlert = true
@@ -37,6 +40,15 @@ struct ExistingProjectMenu: View {
                     }
                 }
             }
+            .alert("Error occured",
+                   isPresented: $showingErrorAlert,
+                   actions: {
+                Button(role: .cancel,
+                       action: {
+                    showingErrorAlert = false
+                    presentationMode.wrappedValue.dismiss()
+                }, label: { Text("Dismiss") })
+            }, message: { Text(errorText) })
             
         } else {
             Text("You're not signed in!")
@@ -52,8 +64,45 @@ struct ImportProjectMenu: View {
 }
 
 struct NewProjectMenu: View {
+    @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
+    @EnvironmentObject var sessionStore: SessionStore
+    @State var newFileName: String = ""
+    @State var navigationTag: String?
+    @State var showingErrorAlert = false
+    @State var errorText = ""
+    
     var body: some View {
-        Text("NewProject: pass")
-            .navigationTitle("New")
+        if let user = sessionStore.session {
+            Form {
+                TextField("New file name", text: $newFileName, prompt: Text("Enter new file name"))
+                Button("Proceed") {
+                    let privatePath = Storage.storage().reference().child("user/\(user.uid)/private/\(newFileName)")
+                    let data = "Hello!".data(using: .utf8)!
+                    let _ = privatePath.putData(data, metadata: nil) { metadata, error in
+                        if let realError = error {
+                            errorText = realError.localizedDescription
+                            showingErrorAlert = true
+                        } else {
+                            navigationTag = "1"
+                        }
+                    }
+                    
+                }
+            }
+            .alert("Error occured",
+                   isPresented: $showingErrorAlert,
+                   actions: {
+                Button(role: .cancel,
+                       action: {
+                    showingErrorAlert = false
+                    presentationMode.wrappedValue.dismiss()
+                }, label: { Text("Dismiss") })
+            }, message: { Text(errorText) })
+            
+            NavigationLink("Continue to redacting", tag: "1", selection: $navigationTag, destination: { FileRedactor(fileRef: FRFile(name: newFileName, ref: Storage.storage().reference().child("user/\(user.uid)/private/\(newFileName)"))) })
+                .hidden()
+        } else {
+            Text("You're not signed in!")
+        }
     }
 }
