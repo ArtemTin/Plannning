@@ -13,14 +13,14 @@ struct AccountMainMenu: View {
                 }
                 
                 
-                Button("Log out", action: { showingLogoutAlert.toggle() })
+                Button("Log out", action: { showingLogoutAlert = true })
             }
-            
+            .navigationTitle("Your info")
             .alert("Are you sure?", isPresented: $showingLogoutAlert) { // Log out alert
-                Button(role: .destructive, action: logOutFirebase, label: { Text("Log out") })
+                Button(role: .destructive, action: { logOutFirebase(); showingLogoutAlert = false }, label: { Text("Log out") })
                 Button(role: .cancel, action: { showingLogoutAlert = false }, label: { Text("Cancel") })
             } message: {
-                Text("Are you sure want to log out from \(sessionStore.session?.email ?? "*error getting email*")?")
+                Text("You are logging out from \(sessionStore.session?.email ?? "*error getting email*")")
             }
         }
         else { // user isn't logged in
@@ -34,6 +34,7 @@ struct AccountMainMenu: View {
                         .bold()
                 }
             }
+            .navigationTitle("Welcome!")
         }
     }
 }

@@ -25,6 +25,7 @@ struct ExistingProjectMenu: View {
                     }
                 }
             }
+            .navigationTitle("Your files")
             .onAppear {
                 filesList = []
                 let storage = Storage.storage()
@@ -89,6 +90,7 @@ struct NewProjectMenu: View {
                     
                 }
             }
+            .navigationTitle("Create a new one")
             .alert("Error occured",
                    isPresented: $showingErrorAlert,
                    actions: {
