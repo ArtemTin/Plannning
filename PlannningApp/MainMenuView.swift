@@ -3,9 +3,9 @@ import Firebase
 
 
 struct MainMenu: View {
-    
-    @StateObject var sessionStore = SessionStore()
+    @EnvironmentObject var sessionStore: SessionStore
     @State var selection: String?
+    @AppStorage("showIcons") var showIcons = true
     
     var body: some View {
         NavigationView {
@@ -13,7 +13,9 @@ struct MainMenu: View {
                 Section(header: Text("Account")) {
                     NavigationLink(destination: AccountMainMenu()) {
                         HStack {
-                            Image(systemName: "person.circle")
+                            if showIcons {
+                                Image(systemName: "person")
+                            }
                             if let user = sessionStore.session {
                                 Text("Welcome, \(user.email ?? "*error getting email*")!")
                             } else {
@@ -24,42 +26,48 @@ struct MainMenu: View {
                 }
                 Section(header: Text("Projects")) {
                     NavigationLink(destination: ExistingProjectMenu()) {
-                        HStack {
-                            Text("Open project...")
+                        if showIcons {
+                            Image(systemName: "doc.on.doc")
                         }
+                        Text("Open project...")
                     }
                     
                     NavigationLink(destination: ImportProjectMenu()) {
-                        HStack {
-                            Text("Browse projects online")
+                        if showIcons {
+                            Image(systemName: "network")
                         }
+                        Text("Browse projects online")
                     }
                     
                     NavigationLink(destination: NewProjectMenu()) {
-                        HStack {
-                            Text("Create new project")
+                        if showIcons {
+                            Image(systemName: "doc.badge.plus")
                         }
+                        Text("Create new project")
                     }
                 }
                 Section(header: Text("Settings")) {
                     NavigationLink(destination: SettingsMenu()) {
-                        HStack {
-                            Text("General settings")
+                        if showIcons {
+                            Image(systemName: "gear")
                         }
+                        Text("General settings")
                     }
                 }
             }
             .navigationBarTitle(Text("Plannning"))
         }
-        .environmentObject(sessionStore)
     }
 }
 
 
 struct SettingsMenu: View {
+    @AppStorage("showIcons") private var showIcons = true
+    
     var body: some View {
-        Text("Settings: pass")
-            .navigationTitle("General")
+        Form {
+            Toggle("Show icons in main menu", isOn: $showIcons)
+        }
     }
 }
 

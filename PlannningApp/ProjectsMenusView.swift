@@ -12,7 +12,6 @@ struct ExistingProjectMenu: View {
     @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
     @EnvironmentObject var sessionStore: SessionStore
     @State var filesList: [FRFile] = []
-    
     @State var showingErrorAlert = false
     @State var errorText = ""
     var body: some View {
@@ -41,18 +40,18 @@ struct ExistingProjectMenu: View {
                     }
                 }
             }
-            .alert("Error occured",
-                   isPresented: $showingErrorAlert,
-                   actions: {
+            .alert("Error occured", isPresented: $showingErrorAlert) {
                 Button(role: .cancel,
                        action: {
                     showingErrorAlert = false
                     presentationMode.wrappedValue.dismiss()
                 }, label: { Text("Dismiss") })
-            }, message: { Text(errorText) })
+            } message: { Text(errorText) }
             
         } else {
             Text("You're not signed in!")
+                .bold()
+                .navigationTitle("Your files")
         }
     }
 }
@@ -87,7 +86,6 @@ struct NewProjectMenu: View {
                             navigationTag = "1"
                         }
                     }
-                    
                 }
             }
             .navigationTitle("Create a new one")
@@ -102,9 +100,12 @@ struct NewProjectMenu: View {
             }, message: { Text(errorText) })
             
             NavigationLink("Continue to redacting", tag: "1", selection: $navigationTag, destination: { FileRedactor(fileRef: FRFile(name: newFileName, ref: Storage.storage().reference().child("user/\(user.uid)/private/\(newFileName)"))) })
+                .isDetailLink(false)
                 .hidden()
         } else {
             Text("You're not signed in!")
+                .bold()
+                .navigationTitle("Create a new one")
         }
     }
 }

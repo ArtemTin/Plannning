@@ -7,9 +7,9 @@ struct AccountMainMenu: View {
     var body: some View {
         if let user = sessionStore.session { // user is logged in
             Form { // basic account info
-                Section(user.uid) {
-                Text("Your E-mail: \(user.email ?? "*error getting email*")")
-                Text("Your name: \(user.displayName ?? "*error getting name*")")
+                Section("ID: \(user.uid)") {
+                    Text("Your E-mail: \(user.email ?? "*error getting email*")")
+                    Text("Your name: \(user.displayName ?? "*error getting name*")")
                 }
                 
                 
@@ -55,6 +55,8 @@ struct CreateAccountView: View {
     @State private var showingSuccessAlert: Bool = false
     @State private var successText: String = ""
     @EnvironmentObject var sessionStore: SessionStore
+    @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
+    
     // TODO: Проверка совпадения паролей только если второе поле непустое. Также приложение делает проверки, а не гугл (совпадение паролей и заполненность полей). Сделать кнопку серой, если не заполнено поле.
     
     var body: some View {
@@ -120,24 +122,18 @@ struct CreateAccountView: View {
             .disabled(userPassword != userPasswordConfirmation || userPassword == "" || userPasswordConfirmation == "")
         }
         .navigationTitle("New account")
-        .alert("Error occured",
-               isPresented: $showingErrorAlert,
-               actions: {
-            Button(role: .cancel,
-                   action: {
+        .alert("Error occured", isPresented: $showingErrorAlert) {
+            Button(role: .cancel) {
                 showingErrorAlert = false
-            }, label: { Text("Dismiss") })
-        }, message: { Text(errorText) })
+            } label: { Text("Dismiss") }
+        } message: { Text(errorText) }
         
-        .alert("Success",
-               isPresented: $showingSuccessAlert,
-               actions: {
-            Button(role: .none,
-                   action: {
+        .alert("Success", isPresented: $showingSuccessAlert) {
+            Button {
                 showingSuccessAlert = false
-            }, label: { Text("Okay") })
-        }, message: { Text(successText) })
-        
+                presentationMode.wrappedValue.dismiss()
+            } label: { Text("Okay") }
+        } message: { Text(successText) }
     }
 }
 
@@ -150,7 +146,7 @@ struct LogInView: View {
     @State private var successText: String = ""
     @FocusState private var emailFieldIsFocused: Bool
     @FocusState private var passwordFieldIsFocused: Bool
-    
+    @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
     @EnvironmentObject var sessionStore: SessionStore
     
     var body: some View {
@@ -189,22 +185,15 @@ struct LogInView: View {
         .alert("Error occurred", isPresented: $showingErrorAlert) {
             Button(role: .cancel) {
                 showingErrorAlert = false
-            } label: {
-                Text("Cancel")
-            }
-            
-        } message: {
-            Text(errorText)
-        }
+            } label: { Text("Cancel") }
+        } message: { Text(errorText) }
+        
         .alert("Success", isPresented: $showingSuccessAlert) {
-            Button("Okay") {
+            Button {
                 showingSuccessAlert = false
-            }
-        } message: {
-            Text(successText)
-        }
-        
-        
+                presentationMode.wrappedValue.dismiss()
+            } label: { Text("Okay") }
+        } message: { Text(successText) }
     }
 }
 
