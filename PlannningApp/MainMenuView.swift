@@ -3,9 +3,8 @@ import Firebase
 
 
 struct MainMenu: View {
-    @EnvironmentObject var sessionStore: SessionStore
-    @State var selection: String?
-    @AppStorage("showIcons") var showIcons = true
+    @EnvironmentObject private var sessionStore: SessionStore
+    @AppStorage("showIcons") private var showIcons = true
     
     var body: some View {
         NavigationView {

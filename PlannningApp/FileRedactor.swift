@@ -10,7 +10,7 @@ struct FileRedactor: View {
     @State private var fatalErrorText: String = ""
     @State private var showingErrorAlert: Bool = false
     @State private var errorText: String = ""
-    @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
+    @Environment(\.presentationMode) private var presentationMode: Binding<PresentationMode>
     
     var body: some View {
         TextEditor(text: $docString)

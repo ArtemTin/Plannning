@@ -3,13 +3,23 @@ import Firebase
 
 struct AccountMainMenu: View {
     @State private var showingLogoutAlert: Bool = false
-    @EnvironmentObject var sessionStore: SessionStore
+    @EnvironmentObject private var sessionStore: SessionStore
     var body: some View {
         if let user = sessionStore.session { // user is logged in
             Form { // basic account info
                 Section("ID: \(user.uid)") {
                     Text("Your E-mail: \(user.email ?? "*error getting email*")")
-                    Text("Your name: \(user.displayName ?? "*error getting name*")")
+                    ZStack {
+                        NavigationLink(destination: ChangeAccountName()) {
+                            EmptyView()
+                        }
+                        .opacity(0)
+                        HStack {
+                            Text("Your name: \(user.displayName ?? "*error getting name*")")
+                            Spacer()
+                            Image(systemName: "pencil")
+                        }
+                    }
                 }
                 
                 
@@ -40,6 +50,55 @@ struct AccountMainMenu: View {
 }
 
 
+struct ChangeAccountName: View {
+    @EnvironmentObject private var sessionStore: SessionStore
+    @State private var newUserName: String = ""
+    @State private var errorText: String = ""
+    @State private var showingErrorAlert: Bool = false
+    @State private var successText: String = ""
+    @State private var showingSuccessAlert: Bool = false
+    @FocusState private var newNameFieldIsFocused: Bool
+    @Environment(\.presentationMode) private var presentationMode: Binding<PresentationMode>
+    
+    var body: some View {
+        Form {
+            Section("Old name") {
+                Text(sessionStore.session!.displayName ?? "error getting displayName")
+            }
+            TextField("New name", text: $newUserName, prompt: Text("Enter your new name"))
+                .focused($newNameFieldIsFocused)
+                .disableAutocorrection(true)
+            Button("Submit") {
+                let changeRequest = sessionStore.session!.createProfileChangeRequest()
+                changeRequest.displayName = newUserName
+                changeRequest.commitChanges { error in
+                    if let realError = error {
+                        errorText = realError.localizedDescription
+                        showingErrorAlert = true
+                    } else {
+                        sessionStore.displayName = newUserName
+                        successText = "We succesfully changed your name to \(newUserName)"
+                        showingSuccessAlert = true
+                    }
+                }
+                
+            }
+        }
+        .alert("Error occured", isPresented: $showingErrorAlert) {
+            Button(role: .cancel) {
+                showingErrorAlert = false
+            } label: { Text("Dismiss") }
+        } message: { Text(errorText) }
+        
+        .alert("Success", isPresented: $showingSuccessAlert) {
+            Button {
+                showingSuccessAlert = false
+                presentationMode.wrappedValue.dismiss()
+            } label: { Text("Okay") }
+        } message: { Text(successText) }
+    }
+}
+
 
 struct CreateAccountView: View {
     @State private var userEmail = ""
@@ -54,8 +113,8 @@ struct CreateAccountView: View {
     @State private var errorText: String = ""
     @State private var showingSuccessAlert: Bool = false
     @State private var successText: String = ""
-    @EnvironmentObject var sessionStore: SessionStore
-    @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
+    @EnvironmentObject private var sessionStore: SessionStore
+    @Environment(\.presentationMode) private var presentationMode: Binding<PresentationMode>
     
     // TODO: Проверка совпадения паролей только если второе поле непустое. Также приложение делает проверки, а не гугл (совпадение паролей и заполненность полей). Сделать кнопку серой, если не заполнено поле.
     
@@ -69,6 +128,7 @@ struct CreateAccountView: View {
             }
             TextField("Name", text: $userName, prompt: Text("Enter your name"))
                 .focused($nameFieldIsFocused)
+                .disableAutocorrection(true)
             
             Section(header: Text("Password")) {
                 SecureField("Password", text: $userPassword, prompt: Text("Enter your password"))
@@ -95,26 +155,20 @@ struct CreateAccountView: View {
                         showingErrorAlert = true
                     } else {
                         // setting displayName
-                        let changeRequest = sessionStore.session?.createProfileChangeRequest()
-                        changeRequest?.displayName = userName
-                        if let cR = changeRequest {
-                            cR.commitChanges { error in
-                                if error != nil {
-                                    successText = "We created the account, but couldn't set displayName"
-                                    print(successText)
-                                    showingSuccessAlert = true
-                                } else {
-                                    successText = "We successfully created user with email \(userEmail)"
-                                    sessionStore.displayName = userName
-                                    print(successText)
-                                    showingSuccessAlert = true
-                                }
+                        let changeRequest = sessionStore.session!.createProfileChangeRequest()
+                        changeRequest.displayName = userName
+                        changeRequest.commitChanges {
+                            error in
+                            if error != nil {
+                                successText = "We created the account, but couldn't set displayName"
+                                print(successText)
+                                showingSuccessAlert = true
+                            } else {
+                                successText = "We successfully created user with email \(userEmail)"
+                                sessionStore.displayName = userName
+                                print(successText)
+                                showingSuccessAlert = true
                             }
-                        } else {
-                            successText = "We created the account, but couldn't set displayName"
-                            print(successText)
-                            print("error creating changeRequest")
-                            showingSuccessAlert = true
                         }
                     }
                 }
@@ -146,8 +200,8 @@ struct LogInView: View {
     @State private var successText: String = ""
     @FocusState private var emailFieldIsFocused: Bool
     @FocusState private var passwordFieldIsFocused: Bool
-    @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
-    @EnvironmentObject var sessionStore: SessionStore
+    @Environment(\.presentationMode) private var presentationMode: Binding<PresentationMode>
+    @EnvironmentObject private var sessionStore: SessionStore
     
     var body: some View {
         Form {
